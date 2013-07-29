@@ -4,17 +4,17 @@ $(function() {
 	var Freechat = function() {
 
 		this.PREFIX = 'yichengliu-';
-		this.TPL = '\
-			<div id="freechat" class="freechat">\
-				<div id="freechat-header" class="freechat-header">\
-					<h1 class="freechat-h1">FreeChat</h1>\
+		this.TPL = {
+			box: '\
+				<div id="freechat" class="freechat">\
+					<div id="freechat-content" class="freechat-content"></div>\
 				</div>\
-				<iframe id="freechat-content" class="freechat-content"></iframe>\
-			</div>\
-		';
-		this.$freechat = $('');
-		this.url = '';
-		this.encodeUrl = '';
+			',
+			message: '<p class="freechat-message"></p>'
+		};
+		this.$freechat;
+		this.url;
+		this.encodeUrl;
 
 	};
 
@@ -39,7 +39,7 @@ $(function() {
 				PREFIX = _this.PREFIX,
 				TPL = _this.TPL,
 				$body = $('body'),
-				$freechat = $(TPL);
+				$freechat = $(TPL.box);
 
 			_this.addPrefix($freechat);
 
@@ -55,35 +55,13 @@ $(function() {
 				PREFIX = _this.PREFIX,
 				$freechat = _this.$freechat;
 
-			$freechat.draggable({
-				addClasses: false,
-				cursor: 'move',
-				scroll: false,
-				start: start,
-				stop: stop
-			});
-			$freechat.resizable({
-				handles: 'all',
-				minHeight: 200,
-				minWidth: 200,
-				start: start,
-				stop: stop
-			});
-			function start(event, ui) {
-				console.log(event);
-				console.log(ui);
-				$freechat.addClass(PREFIX + 'freechat-hide');
-			}
-			function stop() {
-				$freechat.removeClass(PREFIX + 'freechat-hide');
-			}
-
 		},
 
 		sync: function() {
 
 			var _this = this,
 				PREFIX = _this.PREFIX,
+				i,
 				url,
 				encodeUrl,
 				$freechat = _this.$freechat,
@@ -92,7 +70,13 @@ $(function() {
 			chrome.extension.sendRequest({ command: "selected-tab" }, function(tab) {
 			    url = tab.url;
 			    encodeUrl = encodeURIComponent(url);
-				$freechatContent.attr('src', 'http://freechat.yichengliu.com/?url=' + encodeUrl);
+			    $.getJSON('http://localhost/freechat?url=' + encodeUrl, function(json) {
+			    	$.each(json, function(i, messageObj) {
+			    		_this.renderMessage(messageObj);
+			    	});
+			    }).done(function() { console.log( "second success" ); })
+				.fail(function() { console.log( "error" ); })
+				.always(function() { console.log( "complete" ); });
 			});
 
 		},
@@ -115,6 +99,21 @@ $(function() {
 					return PREFIX + className;
 				});
 			});
+
+		},
+
+		renderMessage: function($messageObj) {
+
+			var _this = this,
+				TPL = _this.TPL,
+				$freechat = _this.$freechat,
+				$freechatContent = $('#' + PREFIX + 'freechat-content'),
+				$freechatMessage = $(TPL.message);
+
+			$freechatMessage.attr({
+				'title': $messageObj.datetime,
+			}).html($messageObj.message)
+			.appendTo($freechatContent);
 
 		}
 

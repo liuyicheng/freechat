@@ -1,18 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
+<?php
 
-<style>
-* { margin:0; padding:0; border:0; }
-html, body { width:100%; height:100%; overflow:hidden; font:normal 14px/1.5 "Microsoft YaHei", "微软雅黑", Arial, Helvetica, sans-serif; word-break:break-all; background:#e6e6e6; }
-</style>
+$encodeURL = $_GET["url"];
 
-</head>
-<body>
+$json = '
+	[
+		{
+			"message": "hello world",
+			"datetime": "2013-7-28 19:12:30"
+		},
+		{
+			"message": "hey jack",
+			"datetime": "2013-10-20 10:03:54"
+		}
+	]
+';
 
-<h1>hello world</h1>
-<h2>url:</h2>
-<p><?php echo $_GET["url"];?></p>
+echo $json;
 
-</body>
-</html>
+?>
