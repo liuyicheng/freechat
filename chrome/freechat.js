@@ -6,11 +6,15 @@ $(function() {
 		this.PREFIX = 'yichengliu-';
 		this.TPL = {
 			box: '\
-				<div id="freechat" class="freechat">\
-					<div id="freechat-content" class="freechat-content"></div>\
+				<div id="' + this.PREFIX + 'freechat" class="' + this.PREFIX + 'freechat">\
+					<div id="' + this.PREFIX + 'freechat-content" class="' + this.PREFIX + 'freechat-content"></div>\
 				</div>\
 			',
-			message: '<p class="freechat-message"></p>'
+			message: '\
+				<div class="' + this.PREFIX + 'freechat-message cf">\
+					<p></p>\
+				</div>\
+			'
 		};
 		this.$freechat;
 		this.url;
@@ -36,12 +40,9 @@ $(function() {
 		render: function() {
 
 			var _this = this,
-				PREFIX = _this.PREFIX,
 				TPL = _this.TPL,
 				$body = $('body'),
 				$freechat = $(TPL.box);
-
-			_this.addPrefix($freechat);
 
 			_this.$freechat = $freechat;
 
@@ -51,25 +52,20 @@ $(function() {
 
 		bind: function() {
 
-			var _this = this,
-				PREFIX = _this.PREFIX,
-				$freechat = _this.$freechat;
-
 		},
 
 		sync: function() {
 
 			var _this = this,
 				PREFIX = _this.PREFIX,
-				i,
-				url,
-				encodeUrl,
 				$freechat = _this.$freechat,
-				$freechatContent = $('#' + PREFIX + 'freechat-content');
+				$freechatContent = $('#' + PREFIX + 'freechat-content'),
+				url,
+				encodeUrl;
 
 			chrome.extension.sendRequest({ command: "selected-tab" }, function(tab) {
-			    url = tab.url;
-			    encodeUrl = encodeURIComponent(url);
+			    _this.url = url = tab.url;
+			    _this.encodeUrl = encodeUrl = encodeURIComponent(url);
 			    $.getJSON('http://localhost/freechat?url=' + encodeUrl, function(json) {
 			    	$.each(json, function(i, messageObj) {
 			    		_this.renderMessage(messageObj);
@@ -81,39 +77,21 @@ $(function() {
 
 		},
 
-		addPrefix: function($freechat) {
-
-			var _this = this;
-				PREFIX = _this.PREFIX;
-
-			$freechat.attr('id', function(i, id) {
-				return PREFIX + id;
-			}).find('[id^="freechat"]').attr('id', function(i, id) {
-				return PREFIX + id;
-			}).end().attr('class', function(i, className) {
-				return className.replace(/freechat/g, function(className) {
-					return PREFIX + className;
-				});
-			}).find('[class*="freechat"]').attr('class', function(i, className) {
-				return className.replace(/freechat/g, function(className) {
-					return PREFIX + className;
-				});
-			});
-
-		},
-
 		renderMessage: function($messageObj) {
 
 			var _this = this,
+				PREFIX = _this.PREFIX,
 				TPL = _this.TPL,
 				$freechat = _this.$freechat,
 				$freechatContent = $('#' + PREFIX + 'freechat-content'),
-				$freechatMessage = $(TPL.message);
+				$freechatMessage = $(TPL.message),
+				$freechatMessageP = $freechatMessage.find('p');
 
-			$freechatMessage.attr({
+			$freechatMessageP.attr({
 				'title': $messageObj.datetime,
-			}).html($messageObj.message)
-			.appendTo($freechatContent);
+			}).html($messageObj.message);
+
+			$freechatMessage.appendTo($freechatContent);
 
 		}
 
