@@ -66,7 +66,7 @@ $(function() {
 			chrome.extension.sendRequest({ command: "selected-tab" }, function(tab) {
 			    _this.url = url = tab.url;
 			    _this.encodeUrl = encodeUrl = encodeURIComponent(url);
-			    $.getJSON('http://localhost/freechat?url=' + encodeUrl, function(json) {
+			    $.getJSON('http://localhost/freechat/webpage/?url=' + encodeUrl, function(json) {
 			    	$.each(json, function(i, messageObj) {
 			    		_this.renderMessage(messageObj);
 			    	});
