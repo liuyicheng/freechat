@@ -36,7 +36,7 @@ class Mysql {
     public function query($sql) {
 
         $result = mysql_query($sql, $this->link);
-        if ( !$result ) {
+        if (!$result) {
             $this->error($sql . "Statement fails!");
             return false;
         } else {
@@ -56,7 +56,7 @@ class Mysql {
     public function fetchall($result) {
 
         $arr = array ();
-        while ( $row = mysql_fetch_array($result) ) {
+        while ($row = mysql_fetch_array($result)) {
             $arr[] = $row;
         }
         mysql_free_result($result);
@@ -109,7 +109,7 @@ class Mysql {
 
     private function error($err_msg = "") {
 
-        if ( $err_msg == "" ) {
+        if ($err_msg == "") {
             echo "errno: " . mysql_errno . "</br>";
             echo "error: " . mysql_error . "</br>";
         } else {
