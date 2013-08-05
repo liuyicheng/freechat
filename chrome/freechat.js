@@ -3,21 +3,27 @@ $(function() {
 
 	var Freechat = function() {
 
-		this.PREFIX = 'yichengliu-';
+		var PREFIX = 'yichengliu-';
+
 		this.TPL = {
 			box: '\
-				<div id="' + this.PREFIX + 'freechat" class="' + this.PREFIX + 'freechat">\
-					<div id="' + this.PREFIX + 'freechat-content" class="' + this.PREFIX + 'freechat-content"></div>\
+				<div id="' + PREFIX + 'freechat" class="' + PREFIX + 'freechat">\
+					<div id="' + PREFIX + 'freechat-content" class="' + PREFIX + 'freechat-content"></div>\
 				</div>\
 			',
 			message: '\
-				<div class="' + this.PREFIX + 'freechat-message cf">\
+				<div class="' + PREFIX + 'freechat-message cf">\
 					<p></p>\
+				</div>\
+			',
+			form: '\
+				<div class="' + PREFIX + 'freechat-form">\
+					<input id="' + PREFIX + 'freechat-text" class="' + PREFIX + 'freechat-text" type="text" />\
+					<input id="' + PREFIX + 'freechat-submit" class="' + PREFIX + 'freechat-submit" type="button" value="submit" />\
 				</div>\
 			'
 		};
-		this.cometSignal = false;
-		this.timeoutSignal = false;
+		this.PREFIX = PREFIX;
 		this.msgid = 0;
 		this.$freechat;
 		this.url;
@@ -45,15 +51,35 @@ $(function() {
 			var _this = this,
 				TPL = _this.TPL,
 				$body = $('body'),
-				$freechat = $(TPL.box);
+				$freechat = $(TPL.box),
+				$freechatForm = $(TPL.form);
 
 			_this.$freechat = $freechat;
 
+			$freechat.append($freechatForm);
 			$body.prepend($freechat);
 
 		},
 
 		bind: function() {
+
+			var _this = this,
+				PREFIX = _this.PREFIX,
+				$freechat = _this.$freechat,
+				$freechatText = $('#' + PREFIX + 'freechat-text'),
+				$freechatSubmit = $('#' + PREFIX + 'freechat-submit'),
+				message;
+
+			$freechatSubmit.on('click' ,function() {
+
+				message = $freechatText.val();
+				if (message) {
+					_this.setMessage(message);
+				} else {
+					alert('say something');
+				}
+
+			});
 
 		},
 
@@ -69,13 +95,7 @@ $(function() {
 			chrome.extension.sendRequest({ command: "selected-tab" }, function(tab) {
 			    _this.url = url = tab.url;
 			    _this.encodeUrl = encodeUrl = encodeURIComponent(url);
-			    setInterval(function() {
-			    	_this.timeoutSignal = false;
-			    	_this.getRecentMessage();
-			    	setTimeout(function() {
-			    		_this.timeoutSignal = true;
-			    	},5000);
-			    }, 6000);
+		    	_this.getMessage();
 			});
 
 		},
@@ -96,27 +116,33 @@ $(function() {
 			}).html($messageObj.message);
 
 			$freechatMessage.appendTo($freechatContent);
+			$freechatMessage.addClass('yichengliu-freechat-message-end');
 
 		},
 
-	    getRecentMessage: function() {
+	    getMessage: function() {
 
 	    	var _this = this,
 	    		encodeUrl = _this.encodeUrl,
 	    		msgid = _this.msgid;
 
-	    	_this.cometSignal = true;
 		    $.getJSON('http://localhost/freechat/webpage/?url=' + encodeUrl + '&msgid=' + msgid, function(json) {
 		    	$.each(json, function(i, messageObj) {
 		    		_this.renderMessage(messageObj);
 		    	});
-		    	_this.cometSignal = false;
-		    }).done(function() {
-		    	if (!_this.timeoutSignal) {
-		    		_this.getRecentMessage();
-		    	}
-		    }).fail(function() { console.log( "error" ); })
-			.always(function() { console.log( "complete" ); });
+	    		_this.getMessage();
+		    });
+
+		},
+
+		setMessage: function(message) {
+
+			var _this = this,
+				encodeUrl = _this.encodeUrl;
+
+			$.getJSON('http://localhost/freechat/webpage/?url=' + encodeUrl + '&message=' + message, function(json) {
+				console.log(json);
+			});
 
 		}
 
